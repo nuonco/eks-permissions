@@ -1,0 +1,23 @@
+apiVersion: json.kyverno.io/v1alpha1
+kind: ValidatingPolicy
+metadata:
+  nuon:
+    roles: [*]
+    job_types: [docker_build]
+  annotations:
+    description.policy.kyverno.io: This Policy ensures that no image uses the latest
+      tag in Dockerfile.
+    title.policy.kyverno.io: Dockerfile latest image tag not allowed
+  creationTimestamp: null
+  labels:
+    dockerfile.tags.kyverno.io: dockerfile
+  name: dockerfile-deny-latest-image-tag
+spec:
+  rules:
+  - assert:
+      all:
+      - check:
+          ~.(Stages[].From.Image):
+            (contains(@, ':latest')): false
+        message: Latest tag is not allowed
+    name: check-latest-tag
