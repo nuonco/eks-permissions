@@ -1,0 +1,24 @@
+apiVersion: json.kyverno.io/v1alpha1
+kind: ValidatingPolicy
+metadata:
+  nuon:
+    roles: [*]
+    job_types: [docker_build]
+  annotations:
+    description.policy.kyverno.io:
+      This Policy ensures that port 22 is not exposed
+      in Dockerfile.
+    title.policy.kyverno.io: Dockerfile expose port 22 not allowed
+  creationTimestamp: null
+  labels:
+    dockerfile.tags.kyverno.io: dockerfile
+  name: dockerfile-deny-expose-port-22
+spec:
+  rules:
+    - assert:
+        all:
+          - check:
+              ~.(Stages[].Commands[?Name=='EXPOSE'][]):
+                (contains(Ports, '22') || contains(Ports, '22/TCP')): false
+            message: Port 22 exposure is not allowed
+      name: check-port-exposure
